@@ -1,5 +1,6 @@
 package io.reflectoring.springExceptionHandling.advice;
 
+import io.reflectoring.springExceptionHandling.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,6 +22,13 @@ public class CustomExceptionHandler {
         });
 
         return map;
+    }
 
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(UserNotFoundException.class)
+    public Map<String, String> handleUserNotFoundException(UserNotFoundException exception) {
+        Map<String, String> map =  new HashMap<>();
+        map.put("errorMessage", exception.getMessage());
+        return map;
     }
 }

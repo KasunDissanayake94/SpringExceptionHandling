@@ -39,7 +39,8 @@ public class StudentService {
         if(student.isPresent()){
             return ResponseEntity.ok(student.get());
         }
-        throw new UserNotFoundException("User not found");    }
+        throw new UserNotFoundException("User not found with Id : "+ studentId);
+    }
 
     public ResponseEntity<List<Student>> getStudentByName(String studentName) {
         try {
