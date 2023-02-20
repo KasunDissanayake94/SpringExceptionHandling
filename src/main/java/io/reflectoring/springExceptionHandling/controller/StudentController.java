@@ -1,5 +1,7 @@
 package io.reflectoring.springExceptionHandling.controller;
 
+import io.reflectoring.springExceptionHandling.dto.StudentRequest;
+import io.reflectoring.springExceptionHandling.exception.UserNotFoundException;
 import io.reflectoring.springExceptionHandling.model.Student;
 import io.reflectoring.springExceptionHandling.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -16,10 +19,9 @@ public class StudentController {
     @Autowired
     private StudentService studentService;
 
-    @PostMapping("/students")
-    public ResponseEntity<Student> createStudent(@RequestBody Student student){
-        System.out.println("came");
-        return studentService.saveStudent(student);
+    @PostMapping("/create/students")
+    public ResponseEntity<Student> createStudent(@RequestBody @Valid StudentRequest studentRequest){
+        return studentService.saveStudent(studentRequest);
     }
 
     @GetMapping("/get/students/all")
@@ -27,30 +29,30 @@ public class StudentController {
         return studentService.getAllStudents();
     }
 
-    @GetMapping("/get/students/{studentId}")
-    public ResponseEntity<Student> getStudentById(@PathVariable(value = "studentId") int studentId){
+    @GetMapping("/get/student/{studentId}")
+    public ResponseEntity<Student> getStudentById(@PathVariable(value = "studentId") int studentId) throws UserNotFoundException {
         return studentService.getStudentById(studentId);
     }
 
     @GetMapping("/get/students/{studentName}")
-    public ResponseEntity<List<Student>> getStudentById(@PathVariable(value = "studentName") String studentName){
+    public ResponseEntity<List<Student>> getStudentByName(@RequestParam(value = "studentName") String studentName){
         return studentService.getStudentByName(studentName);
     }
 
-    @PutMapping("/students/{studentId}")
-    public ResponseEntity<Student> updateStudentDetails(@PathVariable("id") String studentId, @RequestBody Student student){
-        return studentService.updateStudentDetails(studentId, student);
+    @PutMapping("/update/students/{studentId}")
+    public ResponseEntity<Student> updateStudentDetails(@PathVariable("id") String studentId, @RequestBody StudentRequest studentRequest){
+        return studentService.updateStudentDetails(studentId, studentRequest);
 
     }
 
-    @DeleteMapping("/inventories/{studentId}")
-    public ResponseEntity<HttpStatus> deleteInventory(int studentId) {
+    @DeleteMapping("/delete/students/{studentId}")
+    public ResponseEntity<HttpStatus> deleteStudent(int studentId) {
         return studentService.deleteStudent(studentId);
 
     }
 
-    @DeleteMapping("/inventories")
-    public ResponseEntity<HttpStatus> deleteAllInventories() {
+    @DeleteMapping("/delete/students")
+    public ResponseEntity<HttpStatus> deleteAllStudents() {
         return studentService.deleteAllStudents();
 
     }

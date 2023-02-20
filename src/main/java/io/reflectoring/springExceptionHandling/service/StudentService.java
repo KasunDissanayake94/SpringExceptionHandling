@@ -1,5 +1,7 @@
 package io.reflectoring.springExceptionHandling.service;
 
+import io.reflectoring.springExceptionHandling.dto.StudentRequest;
+import io.reflectoring.springExceptionHandling.exception.UserNotFoundException;
 import io.reflectoring.springExceptionHandling.model.Student;
 import io.reflectoring.springExceptionHandling.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +18,10 @@ public class StudentService {
     @Autowired
     private StudentRepository studentRepository;
 
-    public ResponseEntity<Student> saveStudent(Student student){
+    public ResponseEntity<Student> saveStudent(StudentRequest studentRequest ){
         try {
-            Student student1 = studentRepository.save(new Student(student.getId(), student.getName(), student.getAge(), student.getAddress(), student.getEmail()));
-            return new ResponseEntity<>(student1, HttpStatus.CREATED);
+            Student student1 = Student.build(0, studentRequest.getName(), studentRequest.getAge(), studentRequest.getAddress(), studentRequest.getEmail());
+            return new ResponseEntity<>(studentRepository.save(student1), HttpStatus.CREATED);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -32,11 +34,12 @@ public class StudentService {
         return new ResponseEntity<>(students, HttpStatus.OK);
     }
 
-    public ResponseEntity<Student> getStudentById(int studentId) {
+    public ResponseEntity<Student> getStudentById(int studentId) throws UserNotFoundException {
         Optional<Student> student = studentRepository.findById(studentId);
-
-        return student.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
+        if(student.isPresent()){
+            return ResponseEntity.ok(student.get());
+        }
+        throw new UserNotFoundException("User not found");    }
 
     public ResponseEntity<List<Student>> getStudentByName(String studentName) {
         try {
@@ -55,14 +58,14 @@ public class StudentService {
         }
     }
 
-    public ResponseEntity<Student> updateStudentDetails(String id, Student student) {
-        Optional<Student> inventoryData = studentRepository.findById(Integer.valueOf(id));
-        if (inventoryData.isPresent()) {
-            Student student1 = inventoryData.get();
-            student1.setName(student.getName());
-            student1.setEmail(student.getEmail());
-            student1.setAge(student.getAge());
-            student1.setAddress(student.getAddress());
+    public ResponseEntity<Student> updateStudentDetails(String id, StudentRequest studentRequest) {
+        Optional<Student> studentData = studentRepository.findById(Integer.valueOf(id));
+        if (studentData.isPresent()) {
+            Student student1 = studentData.get();
+             student1.setName(studentRequest.getName());
+            student1.setEmail(studentRequest.getEmail());
+            student1.setAge(studentRequest.getAge());
+            student1.setAddress(studentRequest.getAddress());
             return new ResponseEntity<>(studentRepository.save(student1), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
